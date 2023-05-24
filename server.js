@@ -9,7 +9,7 @@ const ExcelJS = require("exceljs");
 
 // Db Connect
 const sequelize = require("./model/dbconfig");
-const Placement = require("./PlacementModel");
+const Placement = require("./model/PlacementModel");
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -52,8 +52,6 @@ app.get("/", async (req, res) => {
     <title>Crud Operation</title>
     
     <link rel="stylesheet"  href="./index.css">
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.2.3/jspdf.plugin.autotable.min.js" integrity="sha512-o6xhTvCG6mPNRZAsxvThHoHvJuGdxVAd1PnjwqSayourUwz/FBDmwMBuizLxbj2k1wvccnNuYvjYNe4v8EI6dA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     </head>
      <style>
      :root {
