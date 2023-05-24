@@ -5,6 +5,7 @@ const path = require("path");
 const app = express();
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
+const ExcelJS = require("exceljs");
 
 // Db Connect
 const sequelize = require("./model/dbconfig");
@@ -24,7 +25,7 @@ app.get("/", async (req, res) => {
         <tr>
             <td>${data.date}</td>
             <td>${data.workCarried}</td>
-            <td>${data.knowledge}</td>
+            <td>${data.workCarried}</td>
             <td>${data.Competency}</td>
             <td> 
             <div class="button-group">
@@ -55,6 +56,12 @@ app.get("/", async (req, res) => {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.2.3/jspdf.plugin.autotable.min.js" integrity="sha512-o6xhTvCG6mPNRZAsxvThHoHvJuGdxVAd1PnjwqSayourUwz/FBDmwMBuizLxbj2k1wvccnNuYvjYNe4v8EI6dA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     </head>
      <style>
+     :root {
+      --main-blue: #71b7e6;
+      --main-purple: #9b59b6;
+      --main-grey: #ccc;
+      --sub-grey: #d9d9d9;
+    }
     * {
       padding: 0;
       margin: 0;
@@ -63,7 +70,11 @@ app.get("/", async (req, res) => {
       text-decoration: none;
       list-style: none;
     }
-
+    body {
+      
+      background: linear-gradient(135deg, var(--main-blue), var(--main-purple));
+    
+    }
     .header {
       position: sticky;
       top: 0;
@@ -267,6 +278,7 @@ app.get("/", async (req, res) => {
         border-bottom: 0;
       }
     }
+
   </style>
 
   <body>
@@ -276,7 +288,8 @@ app.get("/", async (req, res) => {
             <a href="index.html">Placement <span>Diary</span></a>
           </div>
           <div class="button-group">
-            <a href="/download" class="cu-btn export-btn">Export</a>
+            <a href="/download" class="cu-btn export-btn">Export Pdf</a>
+            <a href="/excelDownload" class="cu-btn export-btn">Export Excel</a>
             <a href="/addPlacement" class="cu-btn add-btn">Add</a>
           </div>
         </nav>
@@ -661,7 +674,6 @@ app.get("/download", async (req, res) => {
 
   let arr = [];
   const tableRows = posts.map((data) => {
-    console.log(data)
     arr.push(data.dataValues);
   });
 
@@ -669,7 +681,7 @@ app.get("/download", async (req, res) => {
 
   const tableData = prepareTableData(arr);
 
-  doc.pipe(fs.createWriteStream("table.pdf"));
+  // doc.pipe(fs.createWriteStream("table.pdf"));
   doc.fontSize(12).text("Placement Data", { align: "center" }).moveDown(0.5);
 
   doc.moveDown(0.5);
@@ -679,6 +691,98 @@ app.get("/download", async (req, res) => {
 
   doc.pipe(res);
   doc.end();
+});
+
+app.get("/excelDownload", async (req, res) => {
+  const Placements = await Placement.findAndCountAll();
+  const posts = Placements.rows;
+
+  let arr = [];
+  const tableRows = posts.map((data) => {
+    arr.push(data.dataValues);
+  });
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Data");
+
+  // Define your dynamic data
+
+  // Add the table headers
+  worksheet.addRow([
+    "DATE",
+    "WORKS CARRIED OUT",
+    "KNOWLEDGE/ EXPERIENCE GAINED OR APPLIED",
+    "COMPETENCY",
+  ]);
+
+  // Add the table rows
+  arr.forEach((row) => {
+    worksheet.addRow([
+      row.date,
+      row.workCarried,
+      row.workCarried,
+      row.Competency,
+    ]);
+  });
+
+  // Apply styles to headers
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFFFF00" }, // Yellow color
+    };
+  });
+
+  // Apply styles to data rows
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber > 1) {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+    }
+  });
+
+  // Generate a unique filename for the Excel file
+  const filename = `table_${Date.now()}.xlsx`;
+  const filePath = `./${filename}`;
+
+  // Save the workbook to a file
+  workbook.xlsx
+    .writeFile(filePath)
+    .then(() => {
+      // Set the response headers for downloading the Excel file
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      // Stream the file to the response
+      fs.createReadStream(filePath).pipe(res);
+    })
+    .catch((error) => {
+      console.error("Error creating Excel file:", error);
+      res.status(500).send("Error creating Excel file.");
+    })
+    .finally(() => {
+      // Delete the temporary file
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting temporary file:", err);
+        }
+      });
+    });
 });
 
 const PORT = process.env.PORT || 8080;
