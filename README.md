@@ -6,30 +6,30 @@ This is a form of Engineering Log in which the student summarises each job they 
 
 ## Technologies Used
 
-HTML
-CSS
-JavaScript
-Node js
+- #### HTML
+- #### CSS
+- #### JavaScript
+- #### Node js
 
 ## Features
 
-Add Placement Record
-Edit the placement Record
-Delete the Placement Record
-Export the All the Record in pdf Format
-Export the All the Record in Excel Format
+- #### Add Placement Record
+- #### Edit the placement Record
+- #### Delete the Placement Record
+- #### Export the All the Record in pdf Format
+- #### Export the All the Record in Excel Format
 
 ### Node
 
 - #### Node Setup
 
-## Steps :
+### Steps :
 
-Download the Zip File.
-Extract a Zip File in Any Folder.
-Run Command in Command Prompt, npm install
-Then Run Command in Command Prompt, npm start
-Then go to browser and open http://localhost:8080/
+- #### Download the Zip File.
+- #### Extract a Zip File in Any Folder.
+- #### Run Command in Command Prompt, npm install
+- #### Then Run Command in Command Prompt, npm start
+- #### Then go to browser and open http://localhost:8080/
 
 ### npm installation
 
